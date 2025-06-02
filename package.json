@@ -1,0 +1,41 @@
+{
+  "name": "to-do-list",
+  "version": "1.0.0",
+  "description": "A simple to-do list app using Webpack and vanilla JS.",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "dev": "webpack serve --config webpack.dev.js",
+    "bg-dev": "nohup npm run dev > dev.log 2>&1 &",
+    "clean": "rm -rf dist",
+    "predeploy": "npm run build",
+    "deploy-all": "npm run build && git add . && git commit -m \"Deploy build\" && git push origin main && npm run ghpages-deploy",
+    "ghpages-deploy": "gh-pages -d dist",
+    "analyze": "webpack --config webpack.prod.js --profile --json > stats.json && npx webpack-bundle-analyzer stats.json",
+    "fix-pages": "git checkout -B gh-pages && git rm -rf . && git clean -fdx && git checkout main -- dist && mv dist/* ./ && rmdir dist && git add . && git commit -m \"Clean gh-pages: deploy only dist files\" && git push origin gh-pages --force",
+    "clean-cache": "rm -rf node_modules package-lock.json && npm cache clean --force && npm run install-dependencies",
+    "install-dependencies": "npm install --save-dev node-localstorage css-loader csv-loader gh-pages globals html-loader html-webpack-plugin style-loader webpack-cli webpack-dev-server webpack-merge webpack",
+    "pagesclean": "git checkout gh-pages && rm -rf * && cp -r dist/* . && git add . && git commit -m \"Deploy\" && git push origin gh-pages --force"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DanielBoehmeIII/To-Do-List.git"
+  },
+  "author": "Daniel Boehme",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "csv-loader": "^3.0.5",
+    "gh-pages": "^6.3.0",
+    "globals": "^16.1.0",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.3",
+    "node-localstorage": "^3.0.5",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.99.8",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1",
+    "webpack-merge": "^6.0.1"
+  }
+}
