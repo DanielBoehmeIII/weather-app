@@ -13,6 +13,9 @@ module.exports = merge(common, {
       directory: path.resolve(__dirname, "dist"),
     },
     watchFiles: ["./src/template.html"],
+    // server: {
+    //   type: "https",
+    // },
     open: true,
     hot: true,
     port: 8080,

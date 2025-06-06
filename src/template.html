@@ -3,114 +3,121 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title></title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Geo:ital@0;1&family=Teko:wght@300..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Pontano+Sans:wght@300..700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap"
       rel="stylesheet"
     />
+    <title>Weather Website</title>
   </head>
-  <body>
-    <header>
-      <nav id="left-nav">
-        <div id="username-container">
-          <p id="username-display">Username</p>
-          <img
-            id="scan-lines"
-            src="https://st.depositphotos.com/15722686/52859/i/450/depositphotos_528591340-stock-photo-abstract-background-copy-space-text.jpg"
+  <body class="tinos-regular">
+    <div id="sidebar-container"></div>
+    <div id="content-container">
+      <div id="header">
+        <div id="search-container">
+          <input
+            type="input"
+            id="search-bar"
+            placeholder="Enter a location"
+            required
           />
+          <button id="search-btn">Search</button>
+          <span class="search-error-message" id="search-error"></span>
         </div>
-        <svg
-          class="main-nav-icon"
-          id="cog"
-          viewBox="-1 0 19 19"
-          xmlns="http://www.w3.org/2000/svg"
-          class="cf-icon-svg"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <path
-              d="M16.014 8.86v1.44a.587.587 0 0 1-.468.556l-1.182.204a.463.463 0 0 1-.114.006 5.902 5.902 0 0 1-.634 1.528.455.455 0 0 1 .078.084l.691.98a.586.586 0 0 1-.062.725l-1.02 1.02a.586.586 0 0 1-.724.061l-.98-.69a.444.444 0 0 1-.085-.078 5.908 5.908 0 0 1-1.544.637.502.502 0 0 1 0 .175l-.182 1.053a.667.667 0 0 1-.633.532h-1.31a.667.667 0 0 1-.633-.532l-.182-1.053a.495.495 0 0 1 0-.175 5.908 5.908 0 0 1-1.544-.637.444.444 0 0 1-.085.077l-.98.691a.586.586 0 0 1-.725-.062l-1.02-1.02a.586.586 0 0 1-.061-.723l.691-.98a.454.454 0 0 1 .077-.085 5.901 5.901 0 0 1-.633-1.528.466.466 0 0 1-.114-.006l-1.182-.204a.586.586 0 0 1-.468-.556V8.86a.586.586 0 0 1 .468-.556L2.636 8.1a.437.437 0 0 1 .114-.005 5.912 5.912 0 0 1 .633-1.528.466.466 0 0 1-.077-.085l-.691-.98a.587.587 0 0 1 .061-.724l1.02-1.02a.587.587 0 0 1 .725-.062l.98.691a.444.444 0 0 1 .085.078 5.903 5.903 0 0 1 1.528-.634.433.433 0 0 1 .005-.114l.204-1.182a.586.586 0 0 1 .556-.468h1.442a.586.586 0 0 1 .556.468l.204 1.182a.448.448 0 0 1 .005.114 5.908 5.908 0 0 1 1.528.634.444.444 0 0 1 .085-.078l.98-.691a.586.586 0 0 1 .724.062l1.02 1.02a.586.586 0 0 1 .062.724l-.691.98a.467.467 0 0 1-.078.085 5.902 5.902 0 0 1 .634 1.528.434.434 0 0 1 .114.005l1.182.204a.587.587 0 0 1 .468.556zm-4.955.72a2.559 2.559 0 1 0-2.56 2.56 2.559 2.559 0 0 0 2.56-2.56z"
-            ></path>
-          </g>
-        </svg>
-      </nav>
-      <nav id="right-nav">
-        <svg
-          class="main-nav-icon"
-          id="left-arrow"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <path
-              d="M15 7L10 12L15 17"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </g>
-        </svg>
-        <svg
-          class="main-nav-icon"
-          id="right-arrow"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <path
-              d="M10 7L15 12L10 17"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </g>
-        </svg>
-        <svg
-          class="main-nav-icon"
-          id="power"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <path
-              d="M12 3V12M18.3611 5.64001C19.6195 6.8988 20.4764 8.50246 20.8234 10.2482C21.1704 11.994 20.992 13.8034 20.3107 15.4478C19.6295 17.0921 18.4759 18.4976 16.9959 19.4864C15.5159 20.4752 13.776 21.0029 11.9961 21.0029C10.2162 21.0029 8.47625 20.4752 6.99627 19.4864C5.51629 18.4976 4.36274 17.0921 3.68146 15.4478C3.00019 13.8034 2.82179 11.994 3.16882 10.2482C3.51584 8.50246 4.37272 6.8988 5.6311 5.64001"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            ></path>
-          </g>
-        </svg>
-      </nav>
-    </header>
-    <div id="content"></div>
+      </div>
+      <div id="main-container">
+        <div id="left-main-container">
+          <div id="main-temp-container">
+            <div id="current-temp-container">
+              <div id="main-temp" class="pontano-sans-temp"></div>
+              <div id="icon-container">
+                <img id="main-icon" />
+              </div>
+            </div>
+            <div id="main-max-min-container">
+              <div id="main-high" class="pontano-sans-temp"></div>
+              <div id="main-low" class="pontano-sans-temp"></div>
+            </div>
+          </div>
+          <div id="description-container">
+            <div id="main-description"></div>
+          </div>
+        </div>
+        <div id="right-main-container">
+          <div id="gif-container"></div>
+        </div>
+      </div>
+      <div id="data-container">
+        <div id="left-detail-container">
+          <div class="header-container">
+            <label class="container-header" id="rain-header">Rain</label>
+          </div>
+          <div class="top-detail-container">
+            <div class="detail-container" id="rain-chance-container">
+              <label class="detail-label" for="rain-chance">Rain chance</label>
+              <div id="rain-chance"></div>
+            </div>
+            <div class="detail-container" id="gusts-container">
+              <label class="detail-label" for="gusts">Gusts</label>
+              <div id="gusts"></div>
+            </div>
+          </div>
+          <div class="bottom-detail-container">
+            <div class="detail-container" id="wind-speed-container">
+              <label class="detail-label" for="wind-speed">Wind Speed</label>
+              <div id="wind-speed"></div>
+            </div>
+          </div>
+        </div>
+        <div id="middle-detail-container">
+          <div class="header-container">
+            <label class="container-header" id="sun header">Solar</label>
+          </div>
+          <div class="top-detail-container">
+            <div id="sunrise-container" class="detail-container">
+              <label class="detail-label" for="sunrise-time">Sunrise</label>
+              <div id="sunrise-time"></div>
+            </div>
+          </div>
+          <div class="bottom-detail-container" class="detail-container">
+            <div class="detail-container" id="sunset-container">
+              <label class="detail-label" for="sunset-time">Sunset</label>
+              <div id="sunset-time"></div>
+            </div>
+          </div>
+        </div>
+        <div id="right-detail-container">
+          <div class="header-container">
+            <label class="container-header" id="atmosphere-header"
+              >Atmosphere</label
+            >
+          </div>
+          <div id="horizontal-detail-container">
+            <div class="small-detail-container">
+              <div class="detail-container" id="atmospheric-pressure-container">
+                <label class="detail-label" for="atmospheric-pressure"
+                  >Atmospheric Pressure</label
+                >
+                <div id="atmospheric-pressure"></div>
+              </div>
+              <div id="humidity-container" class="detail-container">
+                <label class="detail-label" for="humidity">Humidity</label>
+                <div id="humidity"></div>
+              </div>
+            </div>
+            <div class="large-detail-container" class="detail-container">
+              <div id="uv-container" class="detail-container">
+                <label class="detail-label" for="uv-index">UV Index</label>
+                <div id="uv-index"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="bottom-container">
+        <div id="future-container"></div>
+      </div>
+    </div>
   </body>
 </html>
