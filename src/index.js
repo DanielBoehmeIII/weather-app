@@ -36,8 +36,9 @@ async function getLocation() {
     const lat = position.coords.latitude;
     const long = position.coords.longitude;
     const locationString = `${lat},${long}`;
+    const city = await getCityName(lat, long);
     let weatherData = await getWeather(locationString);
-    appendMainWeatherData(weatherData, 0);
+    appendMainWeatherData(weatherData, 0, city);
     appendMainDetailData(weatherData);
     getFutureDisplay(weatherData);
   } catch (error) {
@@ -45,10 +46,31 @@ async function getLocation() {
   }
 }
 
+async function getCityName(lat, long) {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${long}`,
+    );
+    const data = await response.json();
+    const address = data.address;
+    return (
+      address.city ||
+      address.town ||
+      address.village ||
+      address.hamlet ||
+      address.county ||
+      address.state
+    );
+  } catch (error) {
+    console.log("Nominatim reverse geocoding failed:", error);
+    return `${lat},${long}`;
+  }
+}
+
 async function getWeather(location) {
   try {
     let response = await fetch(
-      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=XYYPKNCVA3BUDH5C2JF3DT68M`,
+      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}?key=XYYPKNCVA3BUDH5C2JF3DT68M&iconSet=icons1`,
     );
     let data = await response.json();
     return data;
@@ -57,15 +79,18 @@ async function getWeather(location) {
   }
 }
 
-function appendMainWeatherData(data, day) {
+function appendMainWeatherData(data, day, title) {
+  const titleElement = document.getElementById("title");
+  const iconImg = document.getElementById("main-icon");
   const mainTemp = document.getElementById("main-temp");
   const mainHigh = document.getElementById("main-high");
   const mainLow = document.getElementById("main-low");
+  titleElement.textContent = `${title.toUpperCase()}`;
   mainTemp.textContent = `${data.days[day].temp}°`;
   mainHigh.textContent = `${data.days[day].tempmax}°`;
   mainLow.textContent = `${data.days[day].tempmin}°`;
+  iconImg.src = `./assets/svg/monochromeSvg/${data.days[day].icon}.svg`;
   setWeatherType(data);
-  console.log(data.days[day]);
 }
 
 function appendMainDetailData(data) {
@@ -115,7 +140,7 @@ searchBar.addEventListener("keydown", async (e) => {
     searchString = searchBar.value;
     try {
       let weatherData = await getWeather(searchString);
-      appendMainWeatherData(weatherData, 0);
+      appendMainWeatherData(weatherData, 0, searchString);
       appendMainDetailData(weatherData);
       setWeatherType(weatherData);
     } catch (error) {
@@ -128,12 +153,13 @@ searchBar.addEventListener("keydown", async (e) => {
     }
   }
 });
+
 const searchBtn = document.getElementById("search-btn");
-searchBtn.addEventListener("click", async () => {
+searchBtn.onclick = async () => {
   searchString = searchBar.value;
   try {
     let weatherData = await getWeather(searchString);
-    appendMainWeatherData(weatherData, 0);
+    appendMainWeatherData(weatherData, 0, searchString);
     appendMainDetailData(weatherData);
     setWeatherType(weatherData);
   } catch (error) {
@@ -144,7 +170,7 @@ searchBtn.addEventListener("click", async () => {
       error.message,
     );
   }
-});
+};
 
 const futureContainer = document.getElementById("future-container");
 const days = [
@@ -158,7 +184,7 @@ const days = [
 ];
 
 async function getFutureDisplay(data) {
-  for (let i = 0; i < data.days.length; i++) {
+  for (let i = 1; i < data.days.length; i++) {
     // Ensure date parsing is consistent
     const futureDate = new Date(`${data.days[i].datetime}T00:00:00`);
     appendFutureWeatherData(data, futureDate, i);
@@ -203,20 +229,18 @@ function setWeatherType(data) {
   const precip = today.precipprob;
   const cloudCover = today.cloudcover;
 
-  const sunriseTime = new Date(today.sunriseEpoch * 1000);
-  const sunsetTime = new Date(today.sunsetEpoch * 1000);
+  const sunriseTime = new Date(today.sunriseEpoch * 1000); // UTC
+  const sunsetTime = new Date(today.sunsetEpoch * 1000); // UTC
 
-  const now = new Date(); // current local time
-  // convert local now to UTC
-  const nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+  const now = new Date(); // Also UTC when compared as timestamps
 
-  console.log("now UTC:", nowUtc.toISOString());
+  console.log("now UTC:", now.toISOString());
   console.log("sunrise:", sunriseTime.toISOString());
   console.log("sunset:", sunsetTime.toISOString());
 
   const halfHour = 30 * 60 * 1000;
-  const nearSunrise = Math.abs(nowUtc - sunriseTime) <= halfHour;
-  const nearSunset = Math.abs(nowUtc - sunsetTime) <= halfHour;
+  const nearSunrise = Math.abs(now - sunriseTime) <= halfHour;
+  const nearSunset = Math.abs(now - sunsetTime) <= halfHour;
 
   let weatherType;
   if (nearSunrise || nearSunset) {
@@ -225,13 +249,13 @@ function setWeatherType(data) {
     weatherType = "snow";
   } else if (precip > 50 && temp > 32) {
     weatherType = "storm";
-  } else if (cloudCover >= 80 || temp <= 60) {
+  } else if (cloudCover >= 80 && temp >= 32) {
     weatherType = "clouds";
   } else {
     weatherType = "sun";
   }
 
-  const isNight = nowUtc < sunriseTime || nowUtc > sunsetTime;
+  const isNight = now < sunriseTime || now > sunsetTime;
 
   console.log("weatherType:", weatherType);
   console.log("isNight:", isNight);
@@ -244,6 +268,7 @@ const gif = document.createElement("img");
 const gifContainer = document.getElementById("right-main-container");
 
 function changeTheme(weatherType, temp, isNight) {
+  document.documentElement.style.setProperty("--detail-color", "white");
   if (weatherType === "snow") {
     background.style.backgroundColor = "lightskyblue";
     gif.src = snowBg;
@@ -256,6 +281,7 @@ function changeTheme(weatherType, temp, isNight) {
     document.documentElement.style.setProperty("--header-color", "aliceblue");
     document.documentElement.style.setProperty("--heat-value", "#FFDDE2");
     document.documentElement.style.setProperty("--cool-value", "#D0FFF9");
+    document.documentElement.style.setProperty("--detail-color", "black");
   } else if (weatherType === "sun") {
     background.style.backgroundColor = "deepskyblue";
     gif.src = sunBg;
@@ -269,8 +295,8 @@ function changeTheme(weatherType, temp, isNight) {
       "--header-color",
       "midnightblue",
     );
-    document.documentElement.style.setProperty("--heat-value", "#651b20");
-    document.documentElement.style.setProperty("--cool-value", "#331877");
+    document.documentElement.style.setProperty("--heat-value", "maroon");
+    document.documentElement.style.setProperty("--cool-value", "rebeccapurple");
   } else if (weatherType === "solarchange") {
     background.style.backgroundColor = "coral";
     gif.src = sunsetBg;
@@ -292,10 +318,68 @@ function changeTheme(weatherType, temp, isNight) {
   // 🌓 Overlay night tone if it's night — without affecting gif/theme
   if (isNight) {
     background.style.backgroundColor = "midnightblue";
-    // You could also add a night filter overlay here if needed
   }
 
-  console.log(isNight);
   gif.id = "weather-type-gif";
   gifContainer.appendChild(gif);
 }
+//
+// nextBtn.addEventListener("click", () => {
+//   state.clicked = true;
+//   flashOnClick(nextBtn);
+//   index = (index + 1) % totalSlides;
+//   updateSlide(index, slides, data);
+//   updateDots(index, dots);
+// });
+//
+// previousBtn.addEventListener("click", () => {
+//   state.clicked = true;
+//   flashOnClick(previousBtn);
+//   index = (index - 1 + totalSlides) % totalSlides;
+//   updateSlide(index, slides, data);
+//   updateDots(index, dots);
+// });
+//
+// function updateSlide(index, slides, data) {
+//   // Clear current slide content
+//   slides.innerHTML = "";
+//
+//   const date = new Date(data.days[0].datetime); // base date
+//   const targetDate = new Date(date);
+//   targetDate.setDate(date.getDate() + index);
+//
+//   // Append new weather data dynamically
+//   appendFutureWeatherData(data, targetDate, index);
+// }
+//
+// async function autoScroll(index, slides, state, totalSlides, dots, data) {
+//   while (!state.clicked) {
+//     await sleep(5000);
+//     index = (index + 1) % totalSlides;
+//     updateSlide(index, slides, data);
+//     updateDots(index, dots);
+//   }
+// }
+//
+// function sleep(ms) {
+//   return new Promise((r) => setTimeout(r, ms));
+// }
+//
+// const nextBtn = document.querySelector(".next");
+// const previousBtn = document.querySelector(".previous");
+//
+// // Append this instance to the parent element
+// function assignSvg(parent) {
+//   const elementSvg = parser.parseFromString(
+//     carouselDotSvg,
+//     "image/svg+xml",
+//   ).documentElement;
+//   const svgDiv = document.createElement("div");
+//   parent.appendChild(svgDiv);
+//   svgDiv.classList.add("image-carousel-svg-container");
+//
+//   elementSvg.classList.add("image-carousel-dots-svg");
+//   svgDiv.appendChild(elementSvg);
+//
+//   return svgDiv;
+// }

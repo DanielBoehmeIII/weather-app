@@ -8,11 +8,13 @@
 :root {
   --bg-color: #113344;
   --header-color: floralwhite;
+  --detail-color: white;
   --text-color: linear-gradient(
     to right,
     var(--heat-value) 0%,
     var(--cool-value) 100%
   );
+  --secondary-color: rgba(255, 255, 255, 1);
   --cool-gradient: linear-gradient(to right, #30cfd0 0%, #330867 100%);
   --adaptive-color: rgba(255, 255, 255, 0);
   --bg-color: rgba(0, 0, 0, 0.3);
@@ -98,6 +100,9 @@ body {
   border-radius: 0.9rem;
   width: 1;
   background-color: white;
+  border-radius: 3rem;
+  box-shadow: 0.3rem 0.3rem 0.3rem rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 #search-bar {
@@ -107,30 +112,77 @@ body {
   background-color: transparent;
   border: none;
   padding: 0.5rem;
-  border-right: 1px solid black;
-  box-shadow: 0.7rem 0.7rem 5rem rgba(0, 0, 0, 0.4);
+  font-size: 0.9rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+#search-bar:focus {
+  display: flex;
+  outline: none;
+  border: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 #search-btn {
   background-color: transparent;
   border: none;
   padding: 0.5rem;
+  font-size: 0.9rem;
   width: 20%;
   height: 100%;
-  box-shadow: 0.7rem 0.7rem 5rem rgba(0, 0, 0, 0.4);
+}
+
+#search-btn:focus {
+  background-color: transparent;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  width: 20%;
+  height: 100%;
+  outline: none;
+  border: none;
 }
 
 #main-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-self: center;
   align-self: center;
+  justify-content: center;
+  align-items: center;
   padding: 0.25rem;
-  width: 90%;
+  width: 70%;
   height: 95%;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 1rem;
+  padding: 1rem;
   border: 2px solid black;
+}
+
+#main-weather-container {
+  display: flex;
+  flex-direction: row;
+  justify-self: center;
+  align-self: center;
+  width: 100%;
+  height: 100%;
+}
+
+#title-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  width: 2.5rem;
+  border-radius: 1rem;
+  height: 20%;
+  background-color: var(--adaptive-color);
+}
+
+#title {
+  text-shadow: 0.7rem 0.7rem 2.5rem black;
+  color: var(--secondary-color);
+  white-space: nowrap;
 }
 
 #left-main-container {
@@ -218,6 +270,7 @@ body {
 
 #main-description {
   text-shadow: 0.7rem 0.7rem 2.5rem black;
+  color: var(--secondary-color);
 }
 
 #right-main-container {
@@ -296,6 +349,7 @@ body {
   padding: 1rem;
   font-size: 1.5rem;
   text-shadow: 0.4rem 0.3rem 1rem rgba(0, 0, 0, 0.6);
+  color: var(--detail-color);
 }
 
 .detail-container {
@@ -307,6 +361,7 @@ body {
 
 .detail-container > * {
   text-shadow: 0.4rem 0.3rem 1rem rgba(0, 0, 0, 0.5);
+  color: var(--detail-color);
 }
 
 #horizontal-detail-container {
@@ -346,19 +401,46 @@ body {
   display: flex;
   justify-self: center;
   align-self: center;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  width: 90%;
+  width: 84.9%;
   height: 100%;
+  overflow: hidden;
 }
 
 #future-container {
   display: flex;
+  justify-content: center;
+  align-items: center;
   width: 300%;
   height: 100%;
 }
 
+.next,
+.previous {
+  position: absolute;
+  width: 2rem;
+  height: auto;
+  z-index: 10;
+  border: 2px solid black;
+  border-radius: 0.2rem;
+}
+
+.next {
+  right: 8.3%;
+  border-right: none;
+}
+
+.previous {
+  left: 7.9%;
+  border-left: none;
+}
+
 .future-high-low-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
   font-style: italic;
 }
 
@@ -382,19 +464,19 @@ body {
   align-self: center;
   height: 30%;
   text-shadow: 0.4rem 0.3rem 1rem rgba(0, 0, 0, 0.4);
+  color: var(--secondary-color);
 }
 
 .future-data {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
   height: 70%;
 }
 
 .future-data > span {
   color: red;
-  font-size: 2rem;
+  font-size: 3rem;
   padding: 1rem;
 }
 
