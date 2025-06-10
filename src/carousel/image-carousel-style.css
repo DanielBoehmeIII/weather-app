@@ -6,10 +6,10 @@
   background-color: transparent;
   width: fit-content;
   max-width: 100%;
+  z-index: 999;
 }
 
 .image-carousel-frame {
-  overflow: hidden;
   width: calc(5.4 * 12rem); /* Show 3 items at once */
 }
 
