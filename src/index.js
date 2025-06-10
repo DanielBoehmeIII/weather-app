@@ -171,22 +171,6 @@ function formatTime12h(time24) {
   return `${hour}:${minute} ${ampm}`;
 }
 
-function appendIcon(type, icon) {
-  if (type === "snow") {
-    icon.src = snowIcon.src;
-  } else if (type === "clouds") {
-    icon.src = cloudsIcon.src;
-  } else if (type === "sun") {
-    icon.src = sunIcon.src;
-  } else if (type === "storm") {
-    icon.src = stormIcon.src;
-  } else if (type === "night") {
-    icon.src = nightIcon.src;
-  } else if (type === "solarchange") {
-    icon.src = sunsetIcon.src;
-  }
-}
-
 async function execute() {
   await getLocation();
   // // Call the carousel logic after the DOM loads
