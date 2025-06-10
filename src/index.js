@@ -1,4 +1,8 @@
 import "./style.css";
+import "./media-query.css";
+import icons from "./icon";
+import { addCarouselLogic } from "./carousel/image-carousel.js";
+import "./carousel/image-carousel-style.css";
 const rainBg =
   "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZmE1OGtrc2ZwNDEyZmpzM21idTBwcm92d2VobGRlaDByaW9saXRmeSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RgZFvGuI4OxLjuSvRF/giphy.gif";
 const sunBg =
@@ -12,6 +16,8 @@ const snowBg =
 const nightBg =
   "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2ljcmdoZDhsM2VzODQ2a2d2NmR4Z2ZjMmR2dXpraHlmMTV2Y2k3aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/6705G9I9sUcNCaJF10/giphy.gif";
 
+let globalData;
+let globalCity;
 async function getLocation() {
   let position;
   try {
@@ -38,8 +44,10 @@ async function getLocation() {
     const locationString = `${lat},${long}`;
     const city = await getCityName(lat, long);
     let weatherData = await getWeather(locationString);
-    appendMainWeatherData(weatherData, 0, city);
-    appendMainDetailData(weatherData);
+    globalData = weatherData;
+    globalCity = city;
+    appendMainWeatherData(weatherData, 0, city, "Today");
+    appendMainDetailData(weatherData, 0);
     getFutureDisplay(weatherData);
   } catch (error) {
     console.log("No location available for ", position, ": ", error.message);
@@ -79,21 +87,56 @@ async function getWeather(location) {
   }
 }
 
-function appendMainWeatherData(data, day, title) {
+async function loadSvgIcon(path, container) {
+  const response = await fetch(path);
+  const svgText = await response.text();
+  container.innerHTML = svgText;
+  const svg = container.querySelector("svg");
+  svg.classList.add("icon");
+}
+
+function appendMainWeatherData(data, day, title, dayName) {
   const titleElement = document.getElementById("title");
   const iconImg = document.getElementById("main-icon");
   const mainTemp = document.getElementById("main-temp");
   const mainHigh = document.getElementById("main-high");
   const mainLow = document.getElementById("main-low");
-  titleElement.textContent = `${title.toUpperCase()}`;
+  const mainHighLowContainer = document.getElementById(
+    "main-max-min-container",
+  );
+  mainTemp.addEventListener("mouseenter", () => {
+    transformVals(mainTemp);
+  });
+  mainHighLowContainer.addEventListener("mouseenter", () => {
+    transformVals(mainHigh);
+    transformVals(mainLow);
+  });
+  mainTemp.addEventListener("mouseleave", () => {
+    resetVals(mainTemp);
+  });
+  mainHighLowContainer.addEventListener("mouseleave", () => {
+    resetVals(mainHigh);
+    resetVals(mainLow);
+  });
+
+  const iconName = data.days[day].icon; // e.g., "clear-day"
+  const svgPath = icons[iconName];
+
+  if (svgPath) {
+    loadSvgIcon(svgPath, iconImg);
+  } else {
+    console.warn(`SVG icon not found: ${iconName}`);
+  }
+
+  titleElement.textContent = `${title.toUpperCase()} - ${dayName}`;
   mainTemp.textContent = `${data.days[day].temp}°`;
   mainHigh.textContent = `${data.days[day].tempmax}°`;
   mainLow.textContent = `${data.days[day].tempmin}°`;
-  iconImg.src = `./assets/svg/monochromeSvg/${data.days[day].icon}.svg`;
+
   setWeatherType(data);
 }
 
-function appendMainDetailData(data) {
+function appendMainDetailData(data, day) {
   const rainChance = document.getElementById("rain-chance");
   const windSpeed = document.getElementById("wind-speed");
   const sunriseTime = document.getElementById("sunrise-time");
@@ -103,16 +146,29 @@ function appendMainDetailData(data) {
   const humidity = document.getElementById("humidity");
   const gusts = document.getElementById("gusts");
   const description = document.getElementById("main-description");
-  const icon = document.getElementById("main-icon");
-  rainChance.textContent = `${data.days[0].precipprob}%`;
-  windSpeed.textContent = data.days[0].windspeed;
-  sunriseTime.textContent = data.days[0].sunrise;
-  sunsetTime.textContent = data.days[0].sunset;
-  atmosphericPressure.textContent = data.days[0].pressure;
-  uvIndex.textContent = data.days[0].uvindex;
-  humidity.textContent = data.days[0].humidity;
-  gusts.textContent = data.days[0].windgust;
-  description.textContent = data.days[0].description;
+  rainChance.textContent = `${data.days[day].precipprob}%`;
+  windSpeed.textContent = data.days[day].windspeed;
+  sunriseTime.textContent = formatTime12h(data.days[day].sunrise);
+  sunsetTime.textContent = formatTime12h(data.days[day].sunset);
+  atmosphericPressure.textContent = data.days[day].pressure;
+  uvIndex.textContent = data.days[day].uvindex;
+  humidity.textContent = data.days[day].humidity;
+  gusts.textContent = data.days[day].windgust;
+  description.textContent = data.days[day].description;
+}
+
+function formatTime12h(time24) {
+  // time24 example: "18:45:00"
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+  const ampm = hour >= 12 ? "PM" : "AM";
+
+  // Convert 24h to 12h
+  hour = hour % 12;
+  if (hour === 0) hour = 12; // 0 means 12 AM or 12 PM
+
+  return `${hour}:${minute} ${ampm}`;
 }
 
 function appendIcon(type, icon) {
@@ -131,97 +187,88 @@ function appendIcon(type, icon) {
   }
 }
 
-getLocation();
+async function execute() {
+  await getLocation();
+  // // Call the carousel logic after the DOM loads
+}
+
+execute();
+
+const errorSleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const searchBar = document.getElementById("search-bar");
+const searchError = document.getElementById("search-error");
+const errorContainer = document.getElementById("error-container");
+const arrow = document.querySelector(".arrow");
+const searchBtn = document.getElementById("search-btn");
+function showError(message) {
+  errorContainer.style.opacity = "1";
+  errorContainer.style.visibility = "visible";
+
+  arrow.classList.add("visible");
+
+  searchError.style.opacity = "1";
+  searchError.textContent = message;
+}
+
+function hideError() {
+  errorContainer.style.opacity = "0";
+  errorContainer.style.visibility = "hidden";
+
+  arrow.classList.remove("visible");
+
+  searchError.style.opacity = "0";
+  searchError.textContent = "";
+}
 
 let searchString;
-const searchBar = document.getElementById("search-bar");
 searchBar.addEventListener("keydown", async (e) => {
-  if (e.key === "Enter" || event.code === "Enter" || event.keyCode === 13) {
+  if (e.key === "Enter" || e.code === "Enter" || e.keyCode === 13) {
     searchString = searchBar.value;
     try {
       let weatherData = await getWeather(searchString);
-      appendMainWeatherData(weatherData, 0, searchString);
-      appendMainDetailData(weatherData);
+      globalData = weatherData;
+      globalCity = searchString;
+      appendMainWeatherData(weatherData, 0, searchString, "Today");
+      appendMainDetailData(weatherData, 0);
       setWeatherType(weatherData);
     } catch (error) {
-      console.log(
-        "No location available for ",
-        searchString,
-        ": ",
-        error.message,
-      );
+      if (!searchString || searchString.trim() === "") {
+        showError("Please enter a location");
+        await errorSleep(3000);
+        hideError();
+      } else {
+        showError(
+          `No location available for ${searchString}: ${error.message}`,
+        );
+        await errorSleep(3000);
+        hideError();
+      }
     }
   }
 });
 
-const searchBtn = document.getElementById("search-btn");
 searchBtn.onclick = async () => {
   searchString = searchBar.value;
   try {
     let weatherData = await getWeather(searchString);
-    appendMainWeatherData(weatherData, 0, searchString);
-    appendMainDetailData(weatherData);
+    globalData = weatherData;
+    globalCity = searchString;
+    appendMainWeatherData(weatherData, 0, searchString, "Today");
+    appendMainDetailData(weatherData, 0);
     setWeatherType(weatherData);
   } catch (error) {
-    console.log(
-      "No location available for ",
-      searchString,
-      ": ",
-      error.message,
-    );
+    if (!searchString || searchString.trim() === "") {
+      showError("Please enter a location");
+      await errorSleep(3000);
+      hideError();
+    } else {
+      showError(`No location available for ${searchString}`);
+      await errorSleep(3000);
+      hideError();
+    }
   }
 };
-
-const futureContainer = document.getElementById("future-container");
-const days = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
-async function getFutureDisplay(data) {
-  for (let i = 1; i < data.days.length; i++) {
-    // Ensure date parsing is consistent
-    const futureDate = new Date(`${data.days[i].datetime}T00:00:00`);
-    appendFutureWeatherData(data, futureDate, i);
-  }
-}
-
-function appendFutureWeatherData(data, date, index) {
-  const dayContainer = document.createElement("div");
-  dayContainer.classList.add("date-container");
-
-  const nameOfDay = days[date.getDay()];
-  const nameContainer = document.createElement("p");
-  nameContainer.textContent = nameOfDay;
-  nameContainer.classList.add("name-of-day");
-
-  const dataContainer = document.createElement("div");
-  dataContainer.classList.add("future-data");
-
-  const futureMainTemp = document.createElement("span");
-  futureMainTemp.textContent = `${data.days[index].temp}°`;
-  futureMainTemp.classList.add("pontano-sans-temp");
-
-  const highLowContainer = document.createElement("div");
-  highLowContainer.classList.add("future-high-low-container");
-  const futureHigh = document.createElement("span");
-  futureHigh.textContent = `${data.days[index].tempmax}°`;
-  futureHigh.classList.add("pontano-sans-temp");
-
-  const futureLow = document.createElement("span");
-  futureLow.textContent = `${data.days[index].tempmin}°`;
-  futureLow.classList.add("pontano-sans-temp");
-
-  highLowContainer.append(futureHigh, futureLow);
-  dataContainer.append(futureMainTemp, highLowContainer);
-  dayContainer.append(nameContainer, dataContainer);
-  futureContainer.appendChild(dayContainer);
-}
 
 function setWeatherType(data) {
   const today = data.days[0];
@@ -323,63 +370,118 @@ function changeTheme(weatherType, temp, isNight) {
   gif.id = "weather-type-gif";
   gifContainer.appendChild(gif);
 }
-//
-// nextBtn.addEventListener("click", () => {
-//   state.clicked = true;
-//   flashOnClick(nextBtn);
-//   index = (index + 1) % totalSlides;
-//   updateSlide(index, slides, data);
-//   updateDots(index, dots);
-// });
-//
-// previousBtn.addEventListener("click", () => {
-//   state.clicked = true;
-//   flashOnClick(previousBtn);
-//   index = (index - 1 + totalSlides) % totalSlides;
-//   updateSlide(index, slides, data);
-//   updateDots(index, dots);
-// });
-//
-// function updateSlide(index, slides, data) {
-//   // Clear current slide content
-//   slides.innerHTML = "";
-//
-//   const date = new Date(data.days[0].datetime); // base date
-//   const targetDate = new Date(date);
-//   targetDate.setDate(date.getDate() + index);
-//
-//   // Append new weather data dynamically
-//   appendFutureWeatherData(data, targetDate, index);
-// }
-//
-// async function autoScroll(index, slides, state, totalSlides, dots, data) {
-//   while (!state.clicked) {
-//     await sleep(5000);
-//     index = (index + 1) % totalSlides;
-//     updateSlide(index, slides, data);
-//     updateDots(index, dots);
-//   }
-// }
-//
-// function sleep(ms) {
-//   return new Promise((r) => setTimeout(r, ms));
-// }
-//
-// const nextBtn = document.querySelector(".next");
-// const previousBtn = document.querySelector(".previous");
-//
-// // Append this instance to the parent element
-// function assignSvg(parent) {
-//   const elementSvg = parser.parseFromString(
-//     carouselDotSvg,
-//     "image/svg+xml",
-//   ).documentElement;
-//   const svgDiv = document.createElement("div");
-//   parent.appendChild(svgDiv);
-//   svgDiv.classList.add("image-carousel-svg-container");
-//
-//   elementSvg.classList.add("image-carousel-dots-svg");
-//   svgDiv.appendChild(elementSvg);
-//
-//   return svgDiv;
-// }
+
+const mainContainer = document.getElementById("main-container");
+const middleContainer = document.getElementById("data-container");
+const carouselContainer = document.querySelector(".image-carousel-frame");
+mainContainer.addEventListener("mouseenter", () => {
+  transformContainer(mainContainer);
+});
+middleContainer.addEventListener("mouseenter", () => {
+  transformContainer(middleContainer);
+});
+carouselContainer.addEventListener("mouseenter", () => {
+  transformContainer(carouselContainer);
+});
+mainContainer.addEventListener("mouseleave", () => {
+  resetContainer(mainContainer);
+});
+middleContainer.addEventListener("mouseleave", () => {
+  resetContainer(middleContainer);
+});
+carouselContainer.addEventListener("mouseleave", () => {
+  resetContainer(carouselContainer);
+});
+
+function transformContainer(container) {
+  container.style.transform = "translateY(-0.25%)";
+}
+
+function resetContainer(container) {
+  container.style.transform = "translateY(0)";
+}
+
+function transformVals(val) {
+  val.style.transform = "translateY(-1.5%)";
+  val.setAttribute("above", true);
+}
+
+function resetVals(val) {
+  val.style.transform = "translateY(0)";
+  val.setAttribute("above", false);
+}
+
+const days = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+function getFutureDisplay(data) {
+  for (let i = 1; i < data.days.length; i++) {
+    // Ensure date parsing is consistent
+    const futureDate = new Date(`${data.days[i].datetime}T00:00:00`);
+    appendFutureWeatherData(data, futureDate, i);
+  }
+  addCarouselLogic();
+}
+
+function appendFutureWeatherData(data, date, index) {
+  const carouselSlides = document.querySelector(".image-carousel-slides");
+  const dayContainer = document.createElement("div");
+  dayContainer.classList.add("date-container");
+  dayContainer.addEventListener("click", () => {
+    const dayName = dayContainer.querySelector(".name-of-day").textContent;
+    appendMainWeatherData(globalData, index, globalCity, `${dayName}`);
+    appendMainDetailData(globalData, index);
+  });
+
+  const nameOfDay = days[date.getDay()];
+  const nameContainer = document.createElement("p");
+  nameContainer.textContent = `${nameOfDay}`;
+  nameContainer.classList.add("name-of-day");
+
+  const dataContainer = document.createElement("div");
+  dataContainer.classList.add("future-data");
+
+  const futureMainTemp = document.createElement("span");
+  futureMainTemp.textContent = `${data.days[index].temp}°`;
+  futureMainTemp.classList.add("pontano-sans-temp");
+
+  const highLowContainer = document.createElement("div");
+  highLowContainer.classList.add("future-high-low-container");
+  const futureHigh = document.createElement("span");
+  futureHigh.textContent = `${data.days[index].tempmax}°`;
+  futureHigh.classList.add("pontano-sans-temp");
+
+  const futureLow = document.createElement("span");
+  futureLow.textContent = `${data.days[index].tempmin}°`;
+  futureLow.classList.add("pontano-sans-temp");
+
+  highLowContainer.append(futureHigh, futureLow);
+  dataContainer.append(futureMainTemp, highLowContainer);
+  dayContainer.append(nameContainer, dataContainer);
+  carouselSlides.appendChild(dayContainer);
+}
+
+const infoSpan = document.getElementById("info-span");
+infoSpan.addEventListener("mouseenter", () => {
+  transformVals(infoSpan);
+});
+infoSpan.addEventListener("mouseleave", () => {
+  resetVals(infoSpan);
+});
+
+const linkImgs = document.querySelectorAll(".link-img");
+linkImgs.forEach((img) => {
+  img.addEventListener("mouseenter", () => {
+    transformVals(img);
+  });
+  img.addEventListener("mouseleave", () => {
+    resetVals(img);
+  });
+});

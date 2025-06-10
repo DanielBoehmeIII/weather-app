@@ -1,7 +1,7 @@
 {
-  "name": "to-do-list",
+  "name": "whether",
   "version": "1.0.0",
-  "description": "A simple to-do list app using Webpack and vanilla JS.",
+  "description": "A weather app.",
   "main": "index.js",
   "scripts": {
     "start": "webpack serve --open --config webpack.dev.js",
@@ -20,11 +20,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/DanielBoehmeIII/To-Do-List.git"
+    "url": "https://github.com/DanielBoehmeIII/weather-app.git"
   },
   "author": "Daniel Boehme",
   "license": "ISC",
   "devDependencies": {
+    "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
     "csv-loader": "^3.0.5",
     "gh-pages": "^6.3.0",
@@ -37,5 +38,10 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
     "webpack-merge": "^6.0.1"
+  },
+  "dependencies": {
+    "@dboehmeiii/image-carousel": "^1.0.0",
+    "dboehmeiii-dropdown-menu": "^1.0.0",
+    "webpack-copy-plugin": "^0.0.4"
   }
 }

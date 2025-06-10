@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin"); // <-- ADD THIS
 
 module.exports = {
   entry: "./src/index.js",
@@ -7,11 +8,16 @@ module.exports = {
     filename: "app.bundle.js",
     path: path.resolve(__dirname, "dist"),
     clean: true,
-    publicPath: "/weather-app/",
+    publicPath: "/weather-app/", // for gh-pages
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/template.html",
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: "assets", to: "assets" }, // <-- ADD THIS
+      ],
     }),
   ],
   resolve: {
@@ -26,21 +32,17 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
-        // for img in html
         test: /\.html$/i,
         loader: "html-loader",
       },
       {
-        // for img in js or css
-        test: /\.(png|svg|jpg|jpeg|gif|svg|mp3|wav)$/i,
+        test: /\.(png|svg|jpg|jpeg|gif|mp3|wav)$/i,
         type: "asset/resource",
       },
-      // for fonts in css
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: "asset/resource",
       },
-      // below is for csv & xml files
       {
         test: /\.(csv|tsv)$/i,
         use: ["csv-loader"],
