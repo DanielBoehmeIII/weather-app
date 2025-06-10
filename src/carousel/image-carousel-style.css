@@ -1,6 +1,6 @@
 .image-carousel-container {
   display: flex;
-  position: absolute;
+  position: relative;
   align-items: center;
   justify-content: center;
   background-color: transparent;
