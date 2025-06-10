@@ -211,10 +211,11 @@ searchBar.addEventListener("keydown", async (e) => {
     searchString = searchBar.value;
     try {
       let weatherData = await getWeather(searchString);
-      globalData = weatherData;
-      globalCity = searchString;
+      globalData = await weatherData;
+      globalCity = await searchString;
       appendMainWeatherData(weatherData, 0, searchString, "Today");
       appendMainDetailData(weatherData, 0);
+      getFutureDisplay(weatherData);
       setWeatherType(weatherData);
     } catch (error) {
       if (!searchString || searchString.trim() === "") {
@@ -236,10 +237,11 @@ searchBtn.onclick = async () => {
   searchString = searchBar.value;
   try {
     let weatherData = await getWeather(searchString);
-    globalData = weatherData;
-    globalCity = searchString;
+    globalData = await weatherData;
+    globalCity = await searchString;
     appendMainWeatherData(weatherData, 0, searchString, "Today");
     appendMainDetailData(weatherData, 0);
+    getFutureDisplay(weatherData);
     setWeatherType(weatherData);
   } catch (error) {
     if (!searchString || searchString.trim() === "") {
@@ -406,8 +408,11 @@ const days = [
 ];
 
 function getFutureDisplay(data) {
+  const carouselSlides = document.querySelector(".image-carousel-slides");
+  if (carouselSlides) {
+    carouselSlides.innerHTML = ""; // Clear previous slides!
+  }
   for (let i = 1; i < data.days.length; i++) {
-    // Ensure date parsing is consistent
     const futureDate = new Date(`${data.days[i].datetime}T00:00:00`);
     appendFutureWeatherData(data, futureDate, i);
   }
