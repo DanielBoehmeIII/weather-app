@@ -14,3 +14,4 @@ requireSvg.keys().forEach((fileName) => {
 });
 
 export default icons;
+// Used for title div
