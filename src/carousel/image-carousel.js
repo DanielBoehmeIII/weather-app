@@ -18,7 +18,7 @@ export function addCarouselLogic() {
     let index = 0;
     const totalSlides = slides.children.length;
     const dots = [];
-    const navDotContainer = container.querySelector(
+    const navDotContainer = document.querySelector(
       ".image-carousel-nav-dot-container",
     );
     navDotContainer.addEventListener("mouseenter", () => {

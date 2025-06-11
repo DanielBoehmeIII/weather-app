@@ -409,14 +409,24 @@ const days = [
 
 function getFutureDisplay(data) {
   const carouselSlides = document.querySelector(".image-carousel-slides");
+  const navDots = document.querySelector(".image-carousel-nav-dot-container");
+
   if (carouselSlides) {
-    carouselSlides.innerHTML = ""; // Clear previous slides!
+    carouselSlides.innerHTML = ""; // clear all slides
   }
+
+  if (navDots) {
+    navDots.innerHTML = ""; // clear all nav dots
+  }
+
+  // Add new slides
   for (let i = 1; i < data.days.length; i++) {
     const futureDate = new Date(`${data.days[i].datetime}T00:00:00`);
     appendFutureWeatherData(data, futureDate, i);
   }
-  addCarouselLogic();
+
+  // Now rebuild dots and event listeners
+  addCarouselLogic?.();
 }
 
 function appendFutureWeatherData(data, date, index) {
